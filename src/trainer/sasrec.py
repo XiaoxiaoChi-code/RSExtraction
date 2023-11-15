@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 import json
-import faiss
+# import faiss
 import numpy as np
 from abc import *
 from pathlib import Path

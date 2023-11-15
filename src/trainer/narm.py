@@ -7,12 +7,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
-from torch.autograd.gradcheck import zero_gradients
+# from torch.autograd.gradcheck import zero_gradients
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 import json
-import faiss
+# import faiss
 import numpy as np
 from abc import *
 from pathlib import Path

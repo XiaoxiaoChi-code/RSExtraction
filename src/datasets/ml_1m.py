@@ -94,10 +94,10 @@ class ML1MDataset(AbstractDataset):
         # folder_path = self._get_rawdata_folder_path()
         # file_path = folder_path.joinpath('ratings.dat')
 
-        file_path1 = "MovieLens_target_member_dataset.csv"
+        file_path1 = "/content/gdrive/MyDrive/practice/RSExtraction/src/datasets/MovieLens_target_member_dataset.csv"
         df1 = pd.read_csv(file_path1, sep=',')
 
-        file_path2 = "MovieLens_target_nonMember_dataset.csv"
+        file_path2 = "/content/gdrive/MyDrive/practice/RSExtraction/src/datasets/MovieLens_target_nonMember_dataset.csv"
         df2 = pd.read_csv(file_path2, sep=',')
 
         df = pd.concat([df1,df2], ignore_index=True, sort=False)
