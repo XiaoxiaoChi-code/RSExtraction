@@ -287,8 +287,12 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                     batch_candidates = candidates.cpu().numpy()
                 else:
                     batch_tokens = np.concatenate((batch_tokens, seqs.cpu().numpy()))
+                    print("this is the shape of batch_tokens", batch_tokens.shape())
                     batch_logits = np.concatenate((batch_logits, logits.cpu().numpy()))
+                    print("this is the shape of batch_logits", batch_logits.shape())
                     batch_candidates = np.concatenate((batch_candidates, candidates.cpu().numpy()))
+                    print("this is the shape of batch_candidates", batch_candidates.shape())
+                    print("Generating dataset finished ")
 
         dataset.save_dataset(batch_tokens.tolist(), batch_logits.tolist(), batch_candidates.tolist())
 
