@@ -153,6 +153,9 @@ class BERTTrainDataset(data_utils.Dataset):
         tokens = [0] * mask_len + tokens
         labels = [0] * mask_len + labels
 
+        # 验证生成的token的长度 跟 每一个用户对应的sequence序列的长度 是不是 一样的
+        assert len(tokens) == len(seq)
+
         return torch.LongTensor(tokens), torch.LongTensor(labels)
 
     def _getseq(self, user):

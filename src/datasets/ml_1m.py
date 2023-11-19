@@ -76,7 +76,6 @@ class ML1MDataset(AbstractDataset):
         # 到这一步之前都是读取数据，得到了dataframe 类型的数据
 
         # 按照条件 过滤掉不满足要求的用户和商品， 得到过滤之后的df
-
         df = self.filter_triplets(df)
 
         df, umap, smap = self.densify_index(df)
