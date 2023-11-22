@@ -190,8 +190,12 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                         randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
 
                         selected_indices = torch.distributions.Categorical(F.softmax(torch.ones_like(randomized_label), -1).to(randomized_label.device)).sample()
+                        print("this is selected_indices", selected_indices)
                         row_indices = torch.arange(sorted_items.size(0))
+                        print("this is row_indices", row_indices)
+                        print("this is sorted_items[row_indices, selected_indices]", sorted_items[row_indices, selected_indices])
                         seqs = torch.cat((seqs, sorted_items[row_indices, selected_indices].unsqueeze(1)), 1)
+                        break
 
                         try:
                             logits = torch.cat((logits, randomized_label.unsqueeze(1)), 1)
@@ -212,9 +216,13 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                     randomized_label = torch.rand(sorted_items.shape).to(self.device)
                     randomized_label = randomized_label / randomized_label.sum(dim=-1).unsqueeze(-1)
                     randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
-                    
+                    print("logits is ", logits)
+                    print("randomized_label.unsqueeze(1) is", randomized_label.unsqueeze(1))
                     logits = torch.cat((logits, randomized_label.unsqueeze(1)), 1)
                     print("this is logits", logits)
+                    print("---------------------------------------------")
+                    print("candidates is ", candidates)
+                    print("sorted_items.unsqueeze(1) is ", sorted_items.unsqueeze(1))
                     candidates = torch.cat((candidates, sorted_items.unsqueeze(1)), 1)
                     print("this is candidates", candidates)
 
@@ -296,7 +304,7 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                     batch_candidates = np.concatenate((batch_candidates, candidates.cpu().numpy()))
                     print("this is the shape of batch_candidates", batch_candidates.shape())
                     print("Generating dataset finished ")
-
+            break
         dataset.save_dataset(batch_tokens.tolist(), batch_logits.tolist(), batch_candidates.tolist())
 
     def train_autoregressive(self):        
