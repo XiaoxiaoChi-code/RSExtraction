@@ -180,7 +180,7 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                         input_seqs[:, -1] = mask_items
                         # 只有在这一步用到了 self.bb_model 黑盒模型，对它进行query，然后得到 tok-k recommendation list
                         labels = self.bb_model(input_seqs.long())[:, -1, :]
-                        print("the shape of labels is ", labels.shape())
+                        print("the shape of labels is ", labels.shape)
                         # print(labels)
 
                         _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
@@ -200,12 +200,12 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                             logits = randomized_label.unsqueeze(1)
                             candidates = sorted_items.unsqueeze(1)
                     print("this is seqs", seqs)
-                    print("the shape is ", seqs.shape())
+                    print("the shape is ", seqs.shape)
                     input_seqs = torch.zeros((seqs.size(0), self.max_len)).to(self.device)
                     input_seqs[:, :-1] = seqs[:, 1:]
                     input_seqs[:, -1] = mask_items
                     print("this is input_seqs", input_seqs)
-                    print("the shape is ", seqs.shape())
+                    print("the shape is ", input_seqs.shape)
                     labels = self.bb_model(input_seqs.long())[:, -1, :]
                     _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
                     sorted_items = sorted_items[:, :k] + 1
