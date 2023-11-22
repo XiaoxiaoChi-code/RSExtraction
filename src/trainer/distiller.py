@@ -173,14 +173,14 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                 if isinstance(self.bb_model, BERT):
                     mask_items = torch.tensor([self.CLOZE_MASK_TOKEN] * seqs.size(0)).to(self.device)
                     for j in range(self.max_len - 1):
-                        print("max length is ", self.max_len)
+                        # print("max length is ", self.max_len)
                         # print("Going to the inner for loop--------------------------------")
                         input_seqs = torch.zeros((seqs.size(0), self.max_len)).to(self.device)
                         input_seqs[:, (self.max_len-2-j):-1] = seqs
                         input_seqs[:, -1] = mask_items
                         # 只有在这一步用到了 self.bb_model 黑盒模型，对它进行query，然后得到 tok-k recommendation list
                         labels = self.bb_model(input_seqs.long())[:, -1, :]
-                        print("the shape of labels is ", labels.shape)
+                        # print("the shape of labels is ", labels.shape)
                         # print(labels)
 
                         _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
@@ -190,10 +190,10 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                         randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
 
                         selected_indices = torch.distributions.Categorical(F.softmax(torch.ones_like(randomized_label), -1).to(randomized_label.device)).sample()
-                        print("this is selected_indices", selected_indices)
+                        # print("this is selected_indices", selected_indices)
                         row_indices = torch.arange(sorted_items.size(0))
-                        print("this is row_indices", row_indices)
-                        print("this is sorted_items[row_indices, selected_indices]", sorted_items[row_indices, selected_indices])
+                        # print("this is row_indices", row_indices)
+                        # print("this is sorted_items[row_indices, selected_indices]", sorted_items[row_indices, selected_indices])
                         seqs = torch.cat((seqs, sorted_items[row_indices, selected_indices].unsqueeze(1)), 1)
 
 
