@@ -202,6 +202,10 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
 
                         seqs = torch.cat((seqs, sorted_items[row_indices, selected_indices].unsqueeze(1)), 1)
 
+                        if j == self.max_len -2:
+                            print("selected_indices is ", selected_indices)
+                            print("sorted_items[row_indices, selected_indices] is ", sorted_items[row_indices, selected_indices])
+
 
                         try:
                             logits = torch.cat((logits, randomized_label.unsqueeze(1)), 1)
