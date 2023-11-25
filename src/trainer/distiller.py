@@ -179,26 +179,27 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                         input_seqs = torch.zeros((seqs.size(0), self.max_len)).to(self.device)
                         input_seqs[:, (self.max_len-2-j):-1] = seqs
                         input_seqs[:, -1] = mask_items
-                        # 只有在这一步用到了 self.bb_model 黑盒模型，对它进行query，然后得到 tok-k recommendation list
+                        # 只有在这一步用到了 self.bb_model 黑盒模型，对它进行query，得到的 labels是 (50，3075)维的logits ，
+                        # 不是probability， 也不是recommendation list
                         labels = self.bb_model(input_seqs.long())[:, -1, :]
-                        print("the shape of labels is ", labels.shape)
-                        break
-                        # print(labels)
 
                         _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
                         sorted_items = sorted_items[:, :k] + 1
-                        print("sorted_items is {}".format(sorted_items))
-                        print("sorted_items shape is ".format(sorted_items.shape))
+                        # sorted_items 是 top-100 recommendation list 的 item ID
+                        if j == self.max_len-2:
+                            print("the shape of sorted_items is {}".format(sorted_items.shape))
+                            print("recommendation list for the first user in the batch is {}".format(sorted_items[0]))
+                            print("sorted_items.unsqueeze(1) is {}".format(sorted_items.unsqueeze(1)))
+
 
                         randomized_label = torch.rand(sorted_items.shape).to(self.device)
                         randomized_label = randomized_label / randomized_label.sum(dim=-1).unsqueeze(-1)
                         randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
 
                         selected_indices = torch.distributions.Categorical(F.softmax(torch.ones_like(randomized_label), -1).to(randomized_label.device)).sample()
-                        # print("this is selected_indices", selected_indices)
+
                         row_indices = torch.arange(sorted_items.size(0))
-                        # print("this is row_indices", row_indices)
-                        # print("this is sorted_items[row_indices, selected_indices]", sorted_items[row_indices, selected_indices])
+
                         seqs = torch.cat((seqs, sorted_items[row_indices, selected_indices].unsqueeze(1)), 1)
 
 
@@ -208,28 +209,23 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                         except:
                             logits = randomized_label.unsqueeze(1)
                             candidates = sorted_items.unsqueeze(1)
-                    print("this is seqs", seqs)
-                    print("the shape is ", seqs.shape)
+
+
                     input_seqs = torch.zeros((seqs.size(0), self.max_len)).to(self.device)
                     input_seqs[:, :-1] = seqs[:, 1:]
                     input_seqs[:, -1] = mask_items
-                    print("this is input_seqs", input_seqs)
-                    print("the shape is ", input_seqs.shape)
+
                     labels = self.bb_model(input_seqs.long())[:, -1, :]
                     _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
                     sorted_items = sorted_items[:, :k] + 1
+
                     randomized_label = torch.rand(sorted_items.shape).to(self.device)
                     randomized_label = randomized_label / randomized_label.sum(dim=-1).unsqueeze(-1)
                     randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
-                    print("logits is ", logits)
-                    print("randomized_label.unsqueeze(1) is", randomized_label.unsqueeze(1))
+
                     logits = torch.cat((logits, randomized_label.unsqueeze(1)), 1)
-                    print("this is logits", logits)
-                    print("---------------------------------------------")
-                    print("candidates is ", candidates)
-                    print("sorted_items.unsqueeze(1) is ", sorted_items.unsqueeze(1))
                     candidates = torch.cat((candidates, sorted_items.unsqueeze(1)), 1)
-                    print("this is candidates", candidates)
+
 
                 elif isinstance(self.bb_model, SASRec):
                     for j in range(self.max_len - 1):
