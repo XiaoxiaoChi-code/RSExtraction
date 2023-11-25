@@ -173,18 +173,23 @@ class NoDataRankDistillationTrainer(metaclass=ABCMeta):
                 if isinstance(self.bb_model, BERT):
                     mask_items = torch.tensor([self.CLOZE_MASK_TOKEN] * seqs.size(0)).to(self.device)
                     for j in range(self.max_len - 1):
+                        # 这个 for 循环是生成一个batch的 input sequence
                         # print("max length is ", self.max_len)
-                        # print("Going to the inner for loop--------------------------------")
+                        print("---------------------------------for loop {} --------------------------------".format(j))
                         input_seqs = torch.zeros((seqs.size(0), self.max_len)).to(self.device)
                         input_seqs[:, (self.max_len-2-j):-1] = seqs
                         input_seqs[:, -1] = mask_items
                         # 只有在这一步用到了 self.bb_model 黑盒模型，对它进行query，然后得到 tok-k recommendation list
                         labels = self.bb_model(input_seqs.long())[:, -1, :]
-                        # print("the shape of labels is ", labels.shape)
+                        print("the shape of labels is ", labels.shape)
+                        break
                         # print(labels)
 
                         _, sorted_items = torch.sort(labels[:, 1:-1], dim=-1, descending=True)
                         sorted_items = sorted_items[:, :k] + 1
+                        print("sorted_items is {}".format(sorted_items))
+                        print("sorted_items shape is ".format(sorted_items.shape))
+
                         randomized_label = torch.rand(sorted_items.shape).to(self.device)
                         randomized_label = randomized_label / randomized_label.sum(dim=-1).unsqueeze(-1)
                         randomized_label, _ = torch.sort(randomized_label, dim=-1, descending=True)
